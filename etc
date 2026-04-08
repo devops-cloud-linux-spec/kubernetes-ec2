@@ -1,0 +1,24 @@
+It looks like you have two separate issues: containerd is not responding at the expected socket, and there are leftover configuration files from your previous failed attempts.
+
+Follow these steps on the Worker Node to clean the state and fix the runtime connection:
+
+1. Reset the Node
+Since you have existing config files (kubelet.conf, ca.crt), you need to reset the failed join attempt state:
+
+Bash
+sudo kubeadm reset -f
+2. Fix the Containerd Socket
+The error shows containerd.sock: no such file or directory. This usually means containerd is either not running or the config is messed up. Run these to ensure it's healthy:
+
+Bash
+# Ensure containerd is running
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+# Verify the socket actually exists now
+ls -l /var/run/containerd/containerd.sock
+3. Clear Remaining Artifacts (Just in case)
+If kubeadm reset didn't catch everything, manually remove the problematic files:
+
+Bash
+sudo rm -rf /etc/kubernetes/kubelet.conf /etc/kubernetes/pki/ca.crt /
